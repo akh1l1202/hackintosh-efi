@@ -1,0 +1,20 @@
+# OpenCore config backup files
+*.bak
+*.bak_*
+config.plist.nullmoth-*
+config.plist.nullmoth-logo-*
+config.plist.with-dsdt.*
+config.plist.no-dsdt.*
+config_backup_*.plist
+
+# ACPI compiled backup
+DSDT.aml.bak
+SSDT-*.aml.bak
+
+# macOS metadata
+.DS_Store
+.Spotlight-V100
+.fseventsd
+
+# OpenCore debug logs
+opencore-*.txt
