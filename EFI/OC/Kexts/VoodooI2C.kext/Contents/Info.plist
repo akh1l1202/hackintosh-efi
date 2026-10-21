@@ -626,7 +626,7 @@
 			<key>IOClass</key>
 			<string>VoodooI2CPCIController</string>
 			<key>IOPCIMatch</key>
-			<string>0x34e88086&amp;0xFFFCFFFF 0x7acc8086&amp;0xFFFCFFFF 0x7acc8086 0x7acd8086</string>
+			<string>0x34e88086&amp;0xFFFCFFFF 0x7acc8086&amp;0xFFFCFFFF 0x7acc8086 0x7acd8086 0x7a4c8086&amp;0xFFFCFFFF 0x7a4c8086 0x7a4d8086 0x7a4e8086 0x7a4f8086</string>
 			<key>IOProbeScore</key>
 			<integer>9999</integer>
 			<key>IOProviderClass</key>
