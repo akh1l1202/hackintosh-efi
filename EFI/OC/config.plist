@@ -42,7 +42,7 @@
 				<key>Comment</key>
 				<string>SSDT-GPI0.aml</string>
 				<key>Enabled</key>
-				<true/>
+				<false/>
 				<key>Path</key>
 				<string>SSDT-GPI0.aml</string>
 			</dict>
@@ -305,20 +305,6 @@
 				<key>disable-gpu</key>
 				<true/>
 			</dict>
-			<key>PciRoot(0x0)/Pci(0x6,0x0)</key>
-			<dict>
-				<key>ps-max-latency-us</key>
-				<data>
-				AAAAAAAAAAA=
-				</data>
-			</dict>
-			<key>PciRoot(0x0)/Pci(0x6,0x0)/Pci(0x0,0x0)</key>
-			<dict>
-				<key>ps-max-latency-us</key>
-				<data>
-				AAAAAAAAAAA=
-				</data>
-			</dict>
 		</dict>
 		<key>Delete</key>
 		<dict/>
@@ -371,7 +357,7 @@
 				<key>Comment</key>
 				<string>Enable E-cores / Atom hybrid topology for Raptor Lake</string>
 				<key>Enabled</key>
-				<true/>
+				<false/>
 				<key>ExecutablePath</key>
 				<string>Contents/MacOS/CpuTopologyRebuild</string>
 				<key>MaxKernel</key>
@@ -619,11 +605,29 @@
 				<key>Arch</key>
 				<string>Any</string>
 				<key>BundlePath</key>
+				<string>UTBMap.kext</string>
+				<key>Comment</key>
+				<string>v1.1 | Custom USB port map for Lenovo LOQ 15IRX9</string>
+				<key>Enabled</key>
+				<true/>
+				<key>ExecutablePath</key>
+				<string></string>
+				<key>MaxKernel</key>
+				<string></string>
+				<key>MinKernel</key>
+				<string></string>
+				<key>PlistPath</key>
+				<string>Contents/Info.plist</string>
+			</dict>
+			<dict>
+				<key>Arch</key>
+				<string>Any</string>
+				<key>BundlePath</key>
 				<string>UTBDefault.kext</string>
 				<key>Comment</key>
 				<string>V1.0</string>
 				<key>Enabled</key>
-				<true/>
+				<false/>
 				<key>ExecutablePath</key>
 				<string></string>
 				<key>MaxKernel</key>
