@@ -305,6 +305,13 @@
 				<key>disable-gpu</key>
 				<true/>
 			</dict>
+			<key>PciRoot(0x0)/Pci(0x6,0x0)</key>
+			<dict>
+				<key>ps-max-latency-us</key>
+				<data>
+				AAAAAAAAAAA=
+				</data>
+			</dict>
 			<key>PciRoot(0x0)/Pci(0x6,0x0)/Pci(0x0,0x0)</key>
 			<dict>
 				<key>ps-max-latency-us</key>
@@ -1404,7 +1411,7 @@
 			<key>MaxBIOSVersion</key>
 			<false/>
 			<key>ProcessorType</key>
-			<integer>1537</integer>
+			<integer>0</integer>
 			<key>ROM</key>
 			<data>
 			YKN9BSRZ
