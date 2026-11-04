@@ -357,7 +357,7 @@
 				<key>Comment</key>
 				<string>Enable E-cores / Atom hybrid topology for Raptor Lake</string>
 				<key>Enabled</key>
-				<true/>
+				<false/>
 				<key>ExecutablePath</key>
 				<string>Contents/MacOS/CpuTopologyRebuild</string>
 				<key>MaxKernel</key>
