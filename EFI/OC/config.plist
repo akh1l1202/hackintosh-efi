@@ -1089,7 +1089,7 @@
 			<true/>
 			<key>ApplePanic</key>
 			<true/>
-			<key>DisableWatchdog</key>
+			<key>DisableWatchDog</key>
 			<true/>
 			<key>DisplayDelay</key>
 			<integer>0</integer>
