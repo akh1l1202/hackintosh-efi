@@ -1,6 +1,6 @@
-# Lenovo LOQ 15IRX9 - OpenCore EFI for macOS Sequoia
+# Lenovo LOQ 15IRX9 - OpenCore EFI for macOS 26 Tahoe
 
-A fully tuned, clean, and optimized OpenCore EFI configuration for the **Lenovo LOQ 15IRX9 (Type 83DV)** running **macOS Sequoia (15.x)**.
+A fully tuned, clean, and optimized OpenCore EFI configuration for the **Lenovo LOQ 15IRX9 (Type 83DV)** running **macOS 26 Tahoe (Build 25G342)** and **macOS Sequoia (15.x)**.
 
 ---
 
@@ -12,17 +12,18 @@ A fully tuned, clean, and optimized OpenCore EFI configuration for the **Lenovo 
 | **Processor** | 13th Gen Intel® Core™ i5-13450HX (6 P-Cores, 4 E-Cores, 16 Threads, up to 4.60 GHz) |
 | **Chipset** | Intel HM770 (Raptor Lake PCH) |
 | **Memory** | 24 GB DDR5 4800 MHz (Dual Channel) |
-| **Dedicated GPU** | NVIDIA GeForce RTX 4050 Laptop GPU (6 GB GDDR6) via NullMoth v1.14.2 (NVRMFB) |
+| **Dedicated GPU** | NVIDIA GeForce RTX 4050 Laptop GPU (6 GB GDDR6) via NullMoth v2.9 (Metal 4 compute & graphics) |
 | **Integrated GPU** | Intel UHD Graphics (Disabled via `disable-gpu = true` DeviceProperty) |
 | **Display** | 15.6" FHD (1920x1080) IPS, 144Hz |
-| **Audio Codec** | Realtek ALC257 (AppleALC Layout ID: `99`) |
+| **Audio Codec** | Realtek ALC257 (AppleALC Layout ID: `99` + `SimpleHDA.kext` for Tahoe) |
 | **Ethernet** | Realtek RTL8111 Gigabit Ethernet |
-| **Wi-Fi** | Intel® Wi-Fi 6 AX201 160MHz (PCIe `8086:0274`) |
+| **Wi-Fi** | Intel® Wi-Fi 6 AX201 160MHz (PCIe `8086:0274`) via AirportItlwm (Tahoe build, 802.11ax HE enabled) |
 | **Bluetooth** | Intel AX201 Bluetooth (USB `8087:0026`, Internal Port `HS07`) |
-| **Touchpad** | ELAN06FA I2C Precision Touchpad (`PNP0C50` / `MSFT0001` on `_SB.PC00.I2C0`, Address `0x15`) |
+| **Touchpad** | ELAN06FA I2C Precision Touchpad (`PNP0C50` on `_SB.PC00.I2C0`) via VoodooI2C + SSDT-GPI0 native interrupt |
 | **Keyboard** | Lenovo White-Backlit PS/2 Keyboard with Fn Shortcuts |
+| **SMBIOS** | `MacBookPro16,1` (Mobile 6P/12T power vector, 800 MHz LFM floor) |
 | **Bootloader** | OpenCore 1.0.x |
-| **macOS Version** | macOS Sequoia 15.8.1 |
+| **macOS Version** | macOS 26 Tahoe (Build 25G342) / macOS Sequoia (15.x) |
 
 ---
 
@@ -30,16 +31,16 @@ A fully tuned, clean, and optimized OpenCore EFI configuration for the **Lenovo 
 
 | Feature | Status | Notes |
 | :--- | :---: | :--- |
-| **macOS Boot** | ✅ Working | Fast, stable boot via OpenCore |
-| **Display Output** | ✅ Working | Driven via NullMoth framebuffer (RTX 4050) |
+| **macOS Boot** | ✅ Working | Fast, stable boot via OpenCore (`MacBookPro16,1`) |
+| **Display Output** | ✅ Working | Driven via NullMoth 2.9 (RTX 4050, Metal 4, ~74k compute score) |
 | **Native Brightness** | ✅ Working | ACPI-routed via `nvrmacpibl` boot argument (no MonitorControl app needed) |
 | **Brightness Hotkeys** | ✅ Working | Fn keys handled by `BrightnessKeys.kext` + `YogaSMC.kext` |
-| **Audio (Speakers/Mic)** | ✅ Working | Realtek ALC257 with AppleALC layout-id `99` (`alcid=99`) |
+| **Audio (Speakers/Mic)** | ✅ Working | Realtek ALC257 (alcid=99) restored in Tahoe via `SimpleHDA.kext` |
 | **Battery Percentage** | ✅ Working | `ECEnabler.kext` + `SMCBatteryManager.kext` |
 | **Processor Name** | ✅ Working | Correctly displays `13th Gen Intel Core i5-13450HX` in About This Mac |
-| **Trackpad & Gestures** | ✅ Working | ELAN06FA I2C-HID precision multitouch via patched `DSDT.aml` + forced polling |
+| **Trackpad & Gestures** | ✅ Working | ELAN06FA I2C-HID precision multitouch with native GPIO interrupt pinning via `SSDT-GPI0.aml` |
 | **Keyboard & Backlight** | ✅ Working | `VoodooPS2Keyboard.kext` + `YogaSMC.kext` |
-| **Wi-Fi** | ✅ Working | Native macOS status bar menu via `AirportItlwm.kext` |
+| **Wi-Fi** | ✅ Working | Native Wi-Fi menu via `AirportItlwm.kext` (laobamac Tahoe build, `itlwm_he=1`) |
 | **Bluetooth** | ✅ Working | Intel AX201 via `BlueToolFixup` + `IntelBluetoothFirmware` + `IntelBTPatcher` |
 | **Ethernet** | ✅ Working | Realtek RTL8111 Gigabit LAN via `RealtekRTL8111.kext` |
 | **Sleep / Wake** | ✅ Working | Stabilized via `acpi-wake-type = 1` DeviceProperty |
@@ -139,12 +140,13 @@ The trackpad was completely unresponsive. Although the controller loaded, the de
 
 ### 3. Display, Graphics & Native Brightness
 #### Display Pipeline & NullMoth Driver
-* **NullMoth Driver Version:** **`1.14.2`** (`nullmoth-nvidia-1.14.2.tar.gz` / `1401-Mac-1.14.2`), specifically built for macOS 15 Sequoia.
+* **NullMoth Driver Version:** **`2.9`**, specifically built for macOS 26 Tahoe and macOS 15 Sequoia.
+* **Graphics & Compute APIs:** Full hardware acceleration with **Metal 4** compute and rendering support via Mesa NVK / Vulkan backend (~74,000 Metal Geekbench compute score).
 * **Kernel Components (Installed in System Extensions):**
-  * `com.nullmoth.NVRMFB` (0.1) – NVRM Framebuffer driver
-  * `com.nullmoth.NVRMAGDC` (0.1) – Apple Graphics Device Control hook
-  * `com.nullmoth.NVRM` (0.1) – NVIDIA Resource Manager core kernel interface
-  * `com.nullmoth.NVAccel` (0.1) – Hardware 2D/3D acceleration backend
+  * `com.nullmoth.NVRMFB` – NVRM Framebuffer driver
+  * `com.nullmoth.NVRMAGDC` – Apple Graphics Device Control hook
+  * `com.nullmoth.NVRM` – NVIDIA Resource Manager core kernel interface
+  * `com.nullmoth.NVAccel` – Hardware 2D/3D acceleration backend
 * **OpenCore Integration:**
   * `NullMothLogo.efi` (in `EFI/OC/Drivers/`): Injects the companion custom boot logo during OpenCore boot.
   * `NullMothSafe.efi` (in `EFI/OC/Tools/`): Recovery / safe-mode fallback tool.
@@ -158,16 +160,15 @@ The trackpad was completely unresponsive. Although the controller loaded, the de
 
 ---
 
-### 4. Audio (Realtek ALC257)
-* Integrated `AppleALC.kext`.
-* Injected layout-id `99` (`0x63`) via:
-  * Boot argument: `alcid=99`
-  * DeviceProperties: `PciRoot(0x0)/Pci(0x1f,0x3)` with `layout-id` = `<63 00 00 00>`.
-* Fully enables built-in speakers, headphone output jack, and internal microphone.
+### 4. Audio (Realtek ALC257 & macOS Tahoe Restoration)
+* **Realtek ALC257:** Codec path `PciRoot(0x0)/Pci(0x1f,0x3)` injected with layout-id `99` (`0x63`) via `alcid=99`.
+* **macOS 26 Tahoe Support via `SimpleHDA.kext` (v1.0.1):**
+  * In macOS 26 Tahoe, Apple completely removed the legacy `AppleHDA.kext` stack from `/System/Library/Extensions/`.
+  * `SimpleHDA.kext` (by laobamac) is injected right after `AppleALC.kext` (as a Lilu plugin child). It restores the full native AppleHDA architecture on Tahoe, enabling `AppleALC` layout-id 99 to drive built-in stereo speakers, the 3.5mm combo headphone/mic jack, and internal microphones seamlessly.
 
 ---
 
-### 5. Battery Status
+### 5. Battery Status & Embedded Controller
 * **`ECEnabler.kext` (v1.0.6):** Enabled directly after `VirtualSMC.kext` to allow macOS to read Embedded Controller (EC) fields larger than 8 bits without complex manual DSDT register splitting.
 * **`SMCBatteryManager.kext`:** Exposes battery charge state, percentage, wattage, and cycle health to the macOS menu bar.
 
@@ -175,12 +176,13 @@ The trackpad was completely unresponsive. Although the controller loaded, the de
 
 ### 6. Wi-Fi & Bluetooth (Intel AX201)
 #### Wi-Fi
-* Driven by `AirportItlwm.kext` (v2.4.0 for macOS Sequoia).
+* Driven by `AirportItlwm.kext` (laobamac v2.4.0-alpha for macOS 26 Tahoe).
+* Injected with `itlwm_he=1` in `boot-args` for full 802.11ax (Wi-Fi 6) high-efficiency throughput.
 * Provides native Apple Wi-Fi status bar menu integration, automatic reconnection, and WPA2/WPA3 support without requiring helper applications like HeliPort.
 
 #### Bluetooth
 * **Hardware:** Intel AX201 Bluetooth controller on the internal USB bus (`Vendor: 0x8087`, `Product: 0x0026`).
-* **Port Mapping:** USB port `HS07` is mapped as **Internal (`UsbConnector = 255`)** in `UTBDefault.kext` / `USBToolBox.kext`.
+* **Port Mapping:** USB port `HS07` is mapped as **Internal (`UsbConnector = 255`)** in `UTBMap.kext` / `USBToolBox.kext`.
 * **Strict Driver Loading Order:**
   1. `BlueToolFixup.kext` (v2.7.3) – Patches `bluetoothd` on macOS Monterey and newer (must load **first**).
   2. `IntelBluetoothFirmware.kext` (v2.5.0) – Injects the required firmware into the controller.
@@ -192,7 +194,7 @@ The trackpad was completely unresponsive. Although the controller loaded, the de
 
 The active `boot-args` in `config.plist` are:
 ```text
--v debug=0x100 keepsyms=1 nvfb=1 nvaccel=1 nvfbheads=4 -nvkmsnosmooth amfi_get_out_of_my_way=0x1 amfi=0x80 ps2rst=0 ipc_control_port_options=0 nvrmacpibl -vi2c-force-polling alcid=99 revcpu=1 revpatch=cpuname
+-v debug=0x100 keepsyms=1 nvfb=1 nvaccel=1 nvfbheads=4 -nvkmsnosmooth amfi_get_out_of_my_way=0x1 amfi=0x80 ps2rst=0 ipc_control_port_options=0 nvrmacpibl alcid=99 revcpu=1 revpatch=cpuname,sbvmm gfxrst=4 itlwm_he=1
 ```
 
 | Argument | Purpose |
@@ -200,12 +202,13 @@ The active `boot-args` in `config.plist` are:
 | `-v debug=0x100 keepsyms=1` | Verbose boot mode and kernel panic debugging |
 | `nvfb=1 nvaccel=1 nvfbheads=4 -nvkmsnosmooth` | NullMoth NVRMFB display engine configuration for NVIDIA RTX 4050 |
 | `nvrmacpibl` | Routes display backlight brightness through ACPI instead of NVKMS |
-| `amfi_get_out_of_my_way=0x1 amfi=0x80` | AMFI compatibility flags for macOS Sequoia driver signing |
+| `amfi_get_out_of_my_way=0x1 amfi=0x80` | AMFI compatibility flags for macOS Tahoe / Sequoia driver signing |
 | `ipc_control_port_options=0` | IPC control port compatibility flag |
 | `ps2rst=0` | Prevents PS/2 keyboard controller reset loops during boot |
-| `-vi2c-force-polling` | Forces VoodooI2C into timer polling mode for 13th Gen Raptor Lake |
 | `alcid=99` | AppleALC audio layout ID for Realtek ALC257 |
-| `revcpu=1 revpatch=cpuname` | Instructs RestrictEvents to force Intel CPU brand string patching |
+| `revcpu=1 revpatch=cpuname,sbvmm` | RestrictEvents: Forces CPU brand string patch (`cpuname`) and VMM OTA update spoof (`sbvmm`) |
+| `gfxrst=4` | WhateverGreen display engine reset policy |
+| `itlwm_he=1` | Enables 802.11ax High Efficiency (Wi-Fi 6) mode on AirportItlwm |
 
 ---
 
@@ -214,19 +217,14 @@ The active `boot-args` in `config.plist` are:
 | PCI Path | Key | Value | Purpose |
 | :--- | :--- | :--- | :--- |
 | `PciRoot(0x0)/Pci(0x1,0x0)/Pci(0x0,0x0)` | `acpi-wake-type` | `01000000` (Number) | Fixes deep sleep/wake issues on PCIe dGPU |
-| `PciRoot(0x0)/Pci(0x15,0x0)` | `force-polling` | `01000000` (Data) | Enables polling on Intel I2C0 controller |
 | `PciRoot(0x0)/Pci(0x1f,0x3)` | `layout-id` | `63000000` (Data) | Realtek ALC257 layout-id 99 |
 | `PciRoot(0x0)/Pci(0x2,0x0)` | `disable-gpu` | `True` (Boolean) | Disables Intel UHD iGPU to prevent framebuffer clashes |
+
+*(Note: Legacy `force-polling` property on `PciRoot(0x0)/Pci(0x15,0x0)` and `-vi2c-force-polling` were removed in favor of native hardware GPIO interrupt handling via `SSDT-GPI0.aml`, eliminating trackpad cursor jitter).*
 
 ---
 
 ### 9. Cleaned EFI Structure
-
-All obsolete files have been purged:
-* **Removed redundant/disabled kexts:** `itlwm.kext` (15 MB duplicate), `CpuTopologyRebuild.kext`, `NVMeFix.kext`, `SMCLightSensor.kext`, `SMCProcessor.kext`, `SMCSuperIO.kext`, `UTBMap.kext`.
-* **Removed unused ACPI tables:** `SSDT-PNLF.aml`, `SSDT-RTC0.aml`, all 12 `.dsl` source files, and `DSDT.aml.bak`.
-* **Removed orphaned ACPI patches:** Cleaned out 3 disabled/unnamed binary patches from `config.plist`.
-* **Removed legacy configs:** Removed 10 outdated backup plist files from the `OC` root directory.
 
 ```text
 EFI/
@@ -236,7 +234,7 @@ EFI/
     ├── ACPI/
     │   ├── DSDT.aml           # Patched: ELAN06FA I2C descriptor & HID2 register address
     │   ├── SSDT-EC.aml         # Embedded Controller dummy device
-    │   ├── SSDT-GPI0.aml       # Exposes GPI0 controller status
+    │   ├── SSDT-GPI0.aml       # Exposes GPI0 controller status for native I2C interrupts
     │   ├── SSDT-MCHC.aml       # Memory controller hub fix
     │   ├── SSDT-PLUG-ALT.aml   # CPU power management for Alder/Raptor Lake
     │   ├── SSDT-RTCAWAC.aml    # Disables AWAC, enables RTC
@@ -251,10 +249,12 @@ EFI/
     │   └── ResetNvramEntry.efi
     ├── Kexts/
     │   ├── AMFIPass.kext
-    │   ├── AirportItlwm.kext
-    │   ├── AppleALC.kext
+    │   ├── AirportItlwm.kext         # Tahoe Wi-Fi 6 driver
+    │   ├── AppleALC.kext             # Audio layout patcher
     │   ├── BlueToolFixup.kext
     │   ├── BrightnessKeys.kext
+    │   ├── CPUFriend.kext            # Frequency scaling injection
+    │   ├── CPUFriendDataProvider.kext# MacBookPro16,1 power profile (800MHz floor)
     │   ├── CpuTscSync.kext
     │   ├── ECEnabler.kext
     │   ├── IntelBTPatcher.kext
@@ -263,8 +263,9 @@ EFI/
     │   ├── RealtekRTL8111.kext
     │   ├── RestrictEvents.kext
     │   ├── SMCBatteryManager.kext
+    │   ├── SimpleHDA.kext            # Tahoe AppleHDA audio stack restoration
     │   ├── USBToolBox.kext
-    │   ├── UTBDefault.kext
+    │   ├── UTBMap.kext
     │   ├── VirtualSMC.kext
     │   ├── VoodooI2C.kext
     │   ├── VoodooI2CHID.kext
@@ -294,7 +295,9 @@ EFI/
 ---
 
 ## 👏 Credits & Acknowledgments
+* [NullMoth](https://github.com/nullmoth) for the NullMoth driver suite (`com.nullmoth.NVRM`, `NVRMFB`, `NVAccel`, `NVRMAGDC`), enabling hardware acceleration, Metal 4 compute, and display driving on modern NVIDIA RTX GPUs in macOS.
 * [Acidanthera](https://github.com/acidanthera) for OpenCore, Lilu, VirtualSMC, AppleALC, RestrictEvents, WhateverGreen, and BrcmPatchRAM (`BlueToolFixup`).
+* [laobamac](https://github.com/laobamac) for `SimpleHDA` (restoring native AppleHDA audio on macOS Tahoe) and Tahoe `AirportItlwm` builds.
 * [OpenIntelWireless](https://github.com/OpenIntelWireless) for `AirportItlwm` and `IntelBluetoothFirmware`.
 * [Alexandre Da Silva](https://github.com/VoodooI2C) and the VoodooI2C team for `VoodooI2C` and `VoodooI2CHID`.
 * [1Revenger1](https://github.com/1Revenger1) for `ECEnabler`.
