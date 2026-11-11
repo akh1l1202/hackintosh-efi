@@ -103,3 +103,28 @@ When the user asks to resume optimizing CPU performance:
    - Inject clean binary `CPUFriendDataProvider.kext` with EPP set to `0x00` (Max Performance) on AC power.
 3. **Windows 11 Dual-Boot Note:**
    - Keep Windows Fast Startup disabled (`powercfg /h off`) so the SK Hynix NVMe controller does not enter suspended D3hot state when pivoting back to macOS.
+
+
+---
+
+
+---
+
+## 5. macOS Session Update: CPU Frequency Unlocking (Phase 2 Completed)
+
+**Date/Time:** 2026-11-10 17:58 IST
+**Status:** Injected valid binary CPUFriend and CPUFriendDataProvider into USB EFI.
+
+### Applied Changes:
+1. CPUFriend.kext: Acidanthera v1.3.0 Mach-O binary bundle placed in EFI/OC/Kexts/.
+2. CPUFriendDataProvider.kext:
+   - Generated from native macOS MacBookPro16,1 profile (Mac-E7203C0F68AA0004.plist).
+   - Pure binary frequency vector (7,668 raw bytes, verified zero XML text corruption).
+   - lpm_ratio adjusted to 0x08 (800 MHz factory idle floor).
+   - epp adjusted to 0x00 (Max Performance / aggressive boost under load).
+   - perf-bias adjusted to 0x01 (High Performance).
+3. OpenCore Injection:
+   - Registered at index 2 (CPUFriend.kext) and index 3 (CPUFriendDataProvider.kext) directly after CpuTscSync.kext.
+   - Verified valid schema with plutil -lint (OK).
+   - Preserved CustomSMBIOSGuid: true, UpdateSMBIOSMode: Custom, and ResizeGpuBars: 13.
+   - Baseline backup saved at /Volumes/1401/EFI/OC/config.plist.working-baseline.
