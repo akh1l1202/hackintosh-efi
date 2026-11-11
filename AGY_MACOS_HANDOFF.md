@@ -128,3 +128,14 @@ When the user asks to resume optimizing CPU performance:
    - Verified valid schema with plutil -lint (OK).
    - Preserved CustomSMBIOSGuid: true, UpdateSMBIOSMode: Custom, and ResizeGpuBars: 13.
    - Baseline backup saved at /Volumes/1401/EFI/OC/config.plist.working-baseline.
+
+
+---
+
+## Section 6: Testing Desktop SMBIOS iMac20,2 (macOS 26 Tahoe)
+- **Date:** 2026-11-11
+- **OS:** macOS 26 Tahoe (Build 25G342)
+- **SMBIOS Target:** iMac20,2 (Desktop 10C/20T i9-10910 profile)
+- **Serial:** C02DWNTE046M | **MLB:** C02023200AZAAM000 | **UUID:** D76AE93F-D23E-4E34-B663-D98AD9D9006C
+- **Purpose:** Test unconstrained desktop power envelope for maximum CPU/GPU wattage against MacBookPro16,1.
+- **Safety Backup:** 
