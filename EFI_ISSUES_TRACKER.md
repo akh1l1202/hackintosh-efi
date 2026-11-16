@@ -92,7 +92,7 @@ Your `config.plist` safely drops two broken tables from Lenovo's OEM firmware AC
 | **5.1** | **Unused RestrictEvents GUIDs** | Removed `4D1FDA02-3869-...`; cleaned `4D1EDE05-...` | ✅ **RESOLVED** | RestrictEvents only reads `4D1FDA02-38C7-4A6A-9CC6-4BCCA8B30102`. Dead typo GUID removed and `DefaultBackgroundColor` retained in `4D1EDE05-...`. |
 | **5.2** | **AMFIPass.kext vs AMFI Boot-Args** | `AMFIPass.kext` enabled + `amfi_get_out_of_my_way=0x1 amfi=0x80` in `boot-args` | ℹ️ **INTENTIONAL** | `amfi_get_out_of_my_way=0x1` is kept intentionally for NullMoth v2.9 unsigned RTX 4050 display drivers. Harmless redundancy. |
 | **5.3** | **Debug Target `65` vs `67`** | `Target: 65` | ℹ️ **HARMLESS** | `65` writes log file to EFI root; `67` also mirrors output to on-screen text console. |
-| **5.4** | **Duplicate `alcid=99` vs `layout-id`** | Present in both `boot-args` and `DeviceProperties` | ℹ️ **HARMLESS** | Harmless duplicate setting Realtek ALC257 layout to 99 (`0x63`). |
+| **5.4** | **Duplicate `alcid=99` vs `layout-id`** | `alcid=99` removed from `boot-args`; `layout-id: 63000000` retained in `DeviceProperties` | ✅ **RESOLVED** | Removed redundant `alcid=99` argument. `DeviceProperties` is the single source of truth for AppleALC layout 99. |
 
 ---
 
@@ -108,3 +108,4 @@ Your `config.plist` safely drops two broken tables from Lenovo's OEM firmware AC
 * **Test 7 (DSDT Semantic Rename):** Renamed `DSDT.aml` to `DSDT-Lenovo-RHUB.aml` (659 KB) on USB and repo. Updated `config.plist` `ACPI -> Add` path to `DSDT-Lenovo-RHUB.aml`. Validated via `ocvalidate` (0 issues). Matches Milestone A functionality.
 * **ACPI Patch Purge:** Completely deleted the disabled `TPAD: _CRS to XCRS Rename` from `ACPI -> Patch`. `ACPI -> Patch` is now clean and empty (`[]`).
 * **Test 8 (NVRAM Delete Flash Wear Cleanup):** Cleared `NVRAM -> Delete` dictionary completely (`{}`). Tested and validated via `ocvalidate` (0 issues). Prevents redundant erase/write cycles to physical SPI flash on every boot. All NVRAM items resolved.
+* **Audio Cleanliness:** Removed redundant `alcid=99` argument from `boot-args`; audio layout 99 is cleanly injected via `DeviceProperties -> PciRoot(0x0)/Pci(0x1f,0x3)`. Validated via `ocvalidate` (0 issues).
