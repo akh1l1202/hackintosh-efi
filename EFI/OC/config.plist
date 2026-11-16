@@ -1069,13 +1069,13 @@
 			<key>PickerVariant</key>
 			<string>Auto</string>
 			<key>PollAppleHotKeys</key>
-			<false/>
-			<key>ShowPicker</key>
 			<true/>
+			<key>ShowPicker</key>
+			<false/>
 			<key>TakeoffDelay</key>
 			<integer>0</integer>
 			<key>Timeout</key>
-			<integer>5</integer>
+			<integer>0</integer>
 		</dict>
 		<key>Debug</key>
 		<dict>
@@ -1094,7 +1094,7 @@
 			<key>SysReport</key>
 			<false/>
 			<key>Target</key>
-			<integer>65</integer>
+			<integer>64</integer>
 		</dict>
 		<key>Entries</key>
 		<array/>
@@ -1250,7 +1250,7 @@
 				AAAAAAAAAAAAAAAAAAA=
 				</data>
 				<key>boot-args</key>
-				<string>-v debug=0x100 keepsyms=1 nvfb=1 nvaccel=1 nvfbheads=4 -nvkmsnosmooth amfi_get_out_of_my_way=0x1 amfi=0x80 ps2rst=0 ipc_control_port_options=0 nvrmacpibl revcpu=1 revpatch=cpuname,sbvmm gfxrst=4 itlwm_he=1 -ibtcompatbeta</string>
+				<string>debug=0x100 keepsyms=1 nvfb=1 nvaccel=1 nvfbheads=4 -nvkmsnosmooth amfi_get_out_of_my_way=0x1 amfi=0x80 ps2rst=0 ipc_control_port_options=0 nvrmacpibl revcpu=1 revpatch=cpuname,sbvmm gfxrst=4 itlwm_he=1 -ibtcompatbeta</string>
 				<key>csr-active-config</key>
 				<data>
 				QwoAAA==
