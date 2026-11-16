@@ -40,6 +40,15 @@ Your `config.plist` safely drops two broken tables from Lenovo's OEM firmware AC
 * **Issue:** `SSDT-USB-Reset.aml` forces `\_SB.PC00.XHCI.RHUB._STA = 0` under macOS. It is only meant as a temporary port-discovery aid for USBToolBox. Leaving it permanently active on a laptop risks breaking ACPI power methods (`_PS0`, `_PS3`), Type-C orientation/hotplug notifications, and sleep/wake power states.
 * **Resolution:** Set to `Enabled: false` and tested in macOS. Verified that all USB 3.0, USB 2.0, Type-C, webcam, and internal Bluetooth (`HS07`) ports operate normally via `UTBMap.kext`. Entry removed from `config.plist` and file deleted from `E:\EFI\OC\ACPI\`.
 
+### 2.3 Milestone A: Trackpad Modularization (SSDT-TPAD.aml)
+* **Status:** ⚠️ **APPLIED (TESTING)**
+* **Issue:** The original `DSDT.aml` hardcoded I2C trackpad registers (`ADR0 = 0x15`, `HID2 = 1`, static `SBFB`, and modified `_CRS`). If Lenovo releases a BIOS update in the future, these hardcoded overrides inside a static DSDT would either need manual re-patching or cause instability.
+* **Resolution:** 
+  1. Restored `Device (TPAD)` in `DSDT.aml` to 100% stock OEM code.
+  2. Created standalone, modular `SSDT-TPAD.aml` (320 bytes) that dynamically sets `ADR0 = 0x15` and `HID2 = One` via `_INI` under `_OSI ("Darwin")` and supplies `ConcatenateResTemplate (SBFB, SBFG)` in `_CRS`.
+  3. Added surgical ACPI patch in `config.plist` (`TPAD: _CRS to XCRS Rename`) targeting solely `Device (TPAD)`'s `_CRS` method.
+  4. Preserved a verified monolithic backup (`DSDT_monolithic_backup.aml`) on the USB drive.
+
 ---
 
 ## 3. SMBIOS Identifiers (`PlatformInfo -> Generic`)
@@ -87,3 +96,4 @@ Your `config.plist` safely drops two broken tables from Lenovo's OEM firmware AC
 * **Test 2 (SSDT-USB-Reset Removal):** Set `SSDT-USB-Reset.aml` to `Enabled: false`. Booted into macOS; all USB ports, internal Bluetooth `HS07`, and webcam verified functional. Removed entry from `config.plist` and deleted `.aml` file.
 * **Test 3 (Bluetooth & Audio Language Tuning):** Added `-ibtcompatbeta` to `boot-args`; set `prev-lang:kbd` to `en-US:0` (`ZW4tVVM6MA==`); reordered Bluetooth kexts to `IntelBluetoothFirmware` → `IntelBTPatcher` → `BlueToolFixup`. Verified working: Bluetooth discovers devices and audio devices show in English.
 * **Test 4 (acpi-wake-type, NVRAM Wear & GUID Cleanup):** Retained `AllowRelocationBlock: true` per 1401 requirements; changed `acpi-wake-type` to `<data>AQ==</data>`; cleaned dead NVRAM GUID `4D1FDA02-3869-...` and duplicate CPU keys; turned off `ForceOcWriteFlash` and `LegacyOverwrite`; removed `prev-lang:kbd` and `csr-active-config` from `NVRAM -> Delete`. Validated via `ocvalidate` (0 issues). Ready for reboot test.
+* **Test 5 (Milestone A - Modular Trackpad):** Replaced hardcoded monolithic trackpad in `DSDT.aml` with stock OEM `TPAD`; compiled standalone `SSDT-TPAD.aml` (320 bytes); added surgical `TPAD: _CRS to XCRS Rename` ACPI patch in `config.plist`. Validated via `ocvalidate` (0 issues). Ready for reboot test.
