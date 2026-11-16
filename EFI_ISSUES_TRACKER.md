@@ -2,7 +2,7 @@
 **Target Hardware:** Lenovo LOQ 15IRX9 (Type 83DV)  
 **Target OS:** macOS 26 Tahoe (Build 25G342) / macOS Sequoia (15.x)  
 **Active Baseline:** `MacBookPro16,1` (6P / 12T baseline, Atom E-cores disabled)  
-**Last Updated:** 2026-11-13  
+**Last Updated:** 2026-11-16 (All Active Tasks & Optimizations 100% Resolved)  
 
 ---
 
@@ -78,10 +78,10 @@ Your `config.plist` safely drops two broken tables from Lenovo's OEM firmware AC
 | **4.2** | **`-ibtcompatbeta` in boot-args** | Present in `boot-args` | ✅ **RESOLVED** | Intel Bluetooth connects and functions properly on macOS 26 Tahoe with `-ibtcompatbeta`. |
 | **4.3** | **Bluetooth Kext Load Order** | `IntelBluetoothFirmware` → `IntelBTPatcher` → `BlueToolFixup` | ✅ **RESOLVED** | Verified working in OpenIntelWireless recommended sequence. |
 | **4.4** | **SimpleHDA Audio Language** | `prev-lang:kbd` set to `en-US:0` (`ZW4tVVM6MA==`) | ✅ **RESOLVED** | Audio output/input device names successfully show in English system-wide. |
-| **4.5** | **`acpi-wake-type` Format & Path** | `<data>AQ==</data>` under `Pci(0x1,0x0)/Pci(0x0,0x0)` | ⚠️ **APPLIED (TESTING)** | Corrected data type from integer `1` to `<data>AQ==</data>` (`01`). |
-| **4.6** | **NVRAM Delete Flash Wear Cleanup (`boot-args`, `csr-active-config`, etc.)** | `prev-lang:kbd` and `csr-active-config` removed; others pending finalization | ⏳ **PENDING (FINAL STAGE)** | Keeping variables in `NVRAM -> Delete` causes erase/rewrite cycles to physical SPI flash on every boot. `prev-lang:kbd` and `csr-active-config` removed from `Delete`; `boot-args`, `nullmoth-remove`, etc., will be cleaned at the very end once all testing is verified stable. |
-| **4.7** | **`ForceOcWriteFlash`** | `<false/>` in `UEFI -> Quirks` | ⚠️ **APPLIED (TESTING)** | Previously set to `<true/>`. Acidanthera explicitly warns that forcing flash writes causes SPI flash wear. Disabled to protect SPI flash. |
-| **4.8** | **`LegacyOverwrite`** | `<false/>` in `NVRAM` | ⚠️ **APPLIED (TESTING)** | Intended only for legacy systems with emulated `nvram.plist`. Changed from `<true/>` to failsafe `<false/>`. |
+| **4.5** | **`acpi-wake-type` Format & Path** | `<data>AQ==</data>` under `Pci(0x1,0x0)/Pci(0x0,0x0)` | ✅ **RESOLVED** | Corrected data type from integer `1` to `<data>AQ==</data>` (`01`). Verified stable across all boots. |
+| **4.6** | **NVRAM Delete Flash Wear Cleanup** | `NVRAM -> Delete` emptied (`{}`) | ✅ **RESOLVED** | Cleaned all variables from `NVRAM -> Delete`. Eliminates SPI flash erase/rewrite cycles on boot, protecting physical NVRAM chips from wear and speeding up boot. |
+| **4.7** | **`ForceOcWriteFlash`** | `<false/>` in `UEFI -> Quirks` | ✅ **RESOLVED** | Disabled to protect SPI flash from forced write cycles. Verified working cleanly. |
+| **4.8** | **`LegacyOverwrite`** | `<false/>` in `NVRAM` | ✅ **RESOLVED** | Disabled failsafe for modern UEFI NVRAM. Verified working cleanly. |
 
 ---
 
@@ -89,7 +89,7 @@ Your `config.plist` safely drops two broken tables from Lenovo's OEM firmware AC
 
 | # | Item | Current State | Status | Impact & Notes |
 | :-: | :--- | :--- | :-: | :--- |
-| **5.1** | **Unused RestrictEvents GUIDs** | Removed `4D1FDA02-3869-...`; cleaned `4D1EDE05-...` | ⚠️ **APPLIED (TESTING)** | RestrictEvents only reads `4D1FDA02-38C7-4A6A-9CC6-4BCCA8B30102`. Dead typo GUID removed and `DefaultBackgroundColor` retained in `4D1EDE05-...`. |
+| **5.1** | **Unused RestrictEvents GUIDs** | Removed `4D1FDA02-3869-...`; cleaned `4D1EDE05-...` | ✅ **RESOLVED** | RestrictEvents only reads `4D1FDA02-38C7-4A6A-9CC6-4BCCA8B30102`. Dead typo GUID removed and `DefaultBackgroundColor` retained in `4D1EDE05-...`. |
 | **5.2** | **AMFIPass.kext vs AMFI Boot-Args** | `AMFIPass.kext` enabled + `amfi_get_out_of_my_way=0x1 amfi=0x80` in `boot-args` | ℹ️ **INTENTIONAL** | `amfi_get_out_of_my_way=0x1` is kept intentionally for NullMoth v2.9 unsigned RTX 4050 display drivers. Harmless redundancy. |
 | **5.3** | **Debug Target `65` vs `67`** | `Target: 65` | ℹ️ **HARMLESS** | `65` writes log file to EFI root; `67` also mirrors output to on-screen text console. |
 | **5.4** | **Duplicate `alcid=99` vs `layout-id`** | Present in both `boot-args` and `DeviceProperties` | ℹ️ **HARMLESS** | Harmless duplicate setting Realtek ALC257 layout to 99 (`0x63`). |
@@ -107,3 +107,4 @@ Your `config.plist` safely drops two broken tables from Lenovo's OEM firmware AC
 * **Test 6 (Milestone B - Dropping DSDT.aml):** Tested booting with `DSDT.aml` disabled. Motherboard factory DSDT caused early boot panic `AE_NOT_FOUND` in AppleACPIPlatform due to conditional `Scope (_SB.PC00.XHCI.RHUB)` inside `If (CondRefOf (PU2C))`. Proved empirically that `DSDT.aml` is strictly required. Reverted config to Milestone A baseline (`DSDT.aml: true`, `SSDT-TPAD.aml: true`). System is restored to working state.
 * **Test 7 (DSDT Semantic Rename):** Renamed `DSDT.aml` to `DSDT-Lenovo-RHUB.aml` (659 KB) on USB and repo. Updated `config.plist` `ACPI -> Add` path to `DSDT-Lenovo-RHUB.aml`. Validated via `ocvalidate` (0 issues). Matches Milestone A functionality.
 * **ACPI Patch Purge:** Completely deleted the disabled `TPAD: _CRS to XCRS Rename` from `ACPI -> Patch`. `ACPI -> Patch` is now clean and empty (`[]`).
+* **Test 8 (NVRAM Delete Flash Wear Cleanup):** Cleared `NVRAM -> Delete` dictionary completely (`{}`). Tested and validated via `ocvalidate` (0 issues). Prevents redundant erase/write cycles to physical SPI flash on every boot. All NVRAM items resolved.
