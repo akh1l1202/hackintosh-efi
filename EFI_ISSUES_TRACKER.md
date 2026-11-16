@@ -48,6 +48,12 @@ Your `config.plist` safely drops two broken tables from Lenovo's OEM firmware AC
   2. Created standalone, modular `SSDT-TPAD.aml` (320 bytes) that dynamically sets `ADR0 = 0x15` and `HID2 = One` via `_INI` under `_OSI ("Darwin")` and supplies `ConcatenateResTemplate (SBFB, SBFG)` in `_CRS`.
   3. Verified working in macOS: full cursor movement, physical/tap clicks, two-finger scroll, and native precision gestures functional.
 
+### 2.4 Milestone B: Complete Elimination of DSDT.aml (Feasibility Tested)
+* **Status:** 🛑 **REVERTED (DSDT.aml IS REQUIRED)**
+* **Finding:** When `DSDT.aml` is disabled, the system attempts to boot using Lenovo's factory OEM DSDT. AppleACPIPlatform immediately halts with `AE_NOT_FOUND` during ACPI table load.
+* **Root Cause:** In the OEM DSDT, Lenovo wraps the root USB hub (`Scope (_SB.PC00.XHCI.RHUB)`) inside module-level `If (CondRefOf (PU2C))` and `If (CondRefOf (PU3C))` blocks. Apple's ACPICA parser does not support module-level conditional scopes at table load time, causing `RHUB` and child USB device paths to fail namespace lookup (`AE_NOT_FOUND`).
+* **Conclusion:** `DSDT.aml` is strictly mandatory for Lenovo LOQ 15IRX9 to fix the OEM RHUB ACPICA crash. Milestone A (modular `SSDT-TPAD.aml` for trackpad + cleaned `DSDT.aml` for RHUB) is the optimal, production-stable architecture. Reverted to Milestone A configuration.
+
 ---
 
 ## 3. SMBIOS Identifiers (`PlatformInfo -> Generic`)
@@ -97,3 +103,4 @@ Your `config.plist` safely drops two broken tables from Lenovo's OEM firmware AC
 * **Test 4 (acpi-wake-type, NVRAM Wear & GUID Cleanup):** Retained `AllowRelocationBlock: true` per 1401 requirements; changed `acpi-wake-type` to `<data>AQ==</data>`; cleaned dead NVRAM GUID `4D1FDA02-3869-...` and duplicate CPU keys; turned off `ForceOcWriteFlash` and `LegacyOverwrite`; removed `prev-lang:kbd` and `csr-active-config` from `NVRAM -> Delete`. Validated via `ocvalidate` (0 issues). Ready for reboot test.
 * **Test 5 (Milestone A - Modular Trackpad Initial Run):** Booted with unpatched `DSDT.aml` + `SSDT-TPAD.aml` + OpenCore ACPI patch. System booted cleanly to desktop, but trackpad did not respond. Log inspection revealed OpenCore patched the in-memory OEM DSDT, then replaced it with the unpatched `DSDT.aml` from disk, leading to ACPICA duplicate `_CRS` rejection.
 * **Test 5b (Milestone A - Native XCRS DSDT):** Applied `_CRS` → `XCRS` rename directly in `DSDT.aml` (checksum sum mod 256 = 0). Disabled redundant OpenCore ACPI patch. `SSDT-TPAD.aml` loaded at index 40. Booted successfully into macOS Tahoe; full precision trackpad gestures, scrolling, tap, and click verified functional. ✅ **MILESTONE A RESOLVED**.
+* **Test 6 (Milestone B - Dropping DSDT.aml):** Tested booting with `DSDT.aml` disabled. Motherboard factory DSDT caused early boot panic `AE_NOT_FOUND` in AppleACPIPlatform due to conditional `Scope (_SB.PC00.XHCI.RHUB)` inside `If (CondRefOf (PU2C))`. Proved empirically that `DSDT.aml` is strictly required. Reverted config to Milestone A baseline (`DSDT.aml: true`, `SSDT-TPAD.aml: true`). System is restored to working state.
